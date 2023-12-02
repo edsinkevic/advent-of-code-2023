@@ -1,8 +1,8 @@
-import Debug.Trace
+import qualified Shared
 
 main :: IO ()
 main = do
-  content <- readFile "data.txt"
+  content <- readFile "testdata.txt"
   let result = foldl accumulate 0 $ lines content
   _ <- print result
   return ()
@@ -13,59 +13,26 @@ accumulate currentSum line = currentSum + deducePower line
 
 deducePower :: String -> Integer
 deducePower = 
-  minPower 0 0 0 
+  minPower 0 0 0
   . filter (/= ' ') 
-  . toColon
+  . Shared.toColon
 
-minPower :: 
-  Integer -> Integer -> Integer -> String -> Integer 
-minPower r g b [] =
-  r * g * b
-minPower r g b (';':xs) =
-  minPower' r g b xs
-minPower r g b (',':xs) =
-  minPower' r g b xs
-minPower r g b xs =
-  minPower' r g b xs
+minPower :: Integer -> Integer -> Integer -> String -> Integer 
+minPower r g b line =
+  case line of
+    (';':xs) -> minPower' r g b xs
+    (',':xs) -> minPower' r g b xs
+    [] -> r * g * b
+    _ -> minPower' r g b line
 
 minPower' :: Integer -> Integer -> Integer -> String -> Integer
 minPower' r g b line =
-  let (afterAmount, amount) = readAmount line
-      (afterColor, color) = readColor afterAmount in
-    case color of
-      "red" -> 
-        minPower (max r amount) g b afterColor
-      "green" -> 
-        minPower r (max g amount) b afterColor
-      "blue" -> 
-        minPower r g (max b amount) afterColor
+  let (amount, color, afterColor) = Shared.readPair line
+      (nr, ng, nb) = changeSet r g b amount color in
+    minPower nr ng nb afterColor
 
-readAmount :: String -> (String, Integer)
-readAmount line = 
-  (dropWhile isNumber line, read $ takeWhile isNumber line)
-
-readColor :: String -> (String, String)
-readColor line = 
-  (
-    dropWhile isColorLetter line, 
-    takeWhile isColorLetter line
-  )
-
-dropAmount  :: String -> String
-dropAmount = dropWhile isNumber
-
-toColon :: String -> String
-toColon = tail . dropWhile (/= ':')
-
-isNumber :: Char -> Bool
-isNumber c = c >= '0' && c <= '9'
-
-isLetter :: Char -> Bool
-isLetter = not . isNumber
-
-isNotSpecialCharacter :: Char -> Bool
-isNotSpecialCharacter c = c /= ';' && c /= ','
-
-isColorLetter :: Char -> Bool
-isColorLetter c = isLetter c && isNotSpecialCharacter c
-
+changeSet r g b amount color = 
+  case color of
+    "red" -> (max r amount, g, b)
+    "green" -> (r, max g amount, b)
+    "blue" -> (r, g, max b amount)
