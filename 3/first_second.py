@@ -18,6 +18,9 @@ def main():
 
     print(current_sum1)
     print(current_sum2)
+    assert current_sum1 == 527446, 'Incorrect answer in the first part'
+    assert current_sum2 == 73201705, 'Incorrect answer in the second part'
+
 
 
 def find_adj_numbers(matrix, _i, _j, visited):
@@ -34,20 +37,16 @@ def find_adj_numbers(matrix, _i, _j, visited):
 
 
 def go_to_start(matrix, i, j):
-    curr = '0'
-    while isnumber(curr):
+    while isnumber(curr := get_at(matrix, i, j)):
         j -= 1
-        curr = get_at(matrix, i, j)
     return j + 1
 
 
 def read_number(matrix, i, j):
-    curr = get_at(matrix, i, j)
     accum = ""
-    while isnumber(curr):
+    while isnumber(curr := get_at(matrix, i, j)):
         j += 1
         accum += curr
-        curr = get_at(matrix, i, j)
     return int(accum)
 
 
