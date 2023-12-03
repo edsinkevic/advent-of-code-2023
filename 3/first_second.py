@@ -1,6 +1,6 @@
 def main():
     with open("data.txt", "r") as f:
-        matrix = [*map(list, f.read().splitlines())]
+        matrix = f.read().splitlines()
 
     current_sum1 = 0
     current_sum2 = 0
