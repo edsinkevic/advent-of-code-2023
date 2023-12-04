@@ -4,36 +4,35 @@ import qualified Data.Map as Map
 import Data.Char (isDigit)
 import qualified Shared as Shared
 
-
 main :: IO ()
 main = print =<< solve <$> readFile "data.txt"
 
 solve :: String -> Integer
 solve content = 
   Map.foldr (+) 0
-  . foldl accumulatePoints Map.empty
+  . foldl accumulateCopies Map.empty
   $ lines content
 
-type Points = Map Integer Integer
+type Copies = Map Integer Integer
 
-accumulatePoints :: Points -> String -> Points
-accumulatePoints points line = 
+accumulateCopies :: Copies -> String -> Copies
+accumulateCopies copies line = 
   let (cardNumber, afterColon) = parseCardNumber line
-      cardPoints = calculatePoints afterColon
-      updated = Map.insertWith (+) cardNumber 1 points
-      copies = Map.findWithDefault 1 cardNumber updated in
-    addCopies cardNumber cardPoints copies updated
+      cardPoints = calculateCopies afterColon
+      updated = Map.insertWith (+) cardNumber 1 copies
+      cardCopies = Map.findWithDefault 1 cardNumber updated in
+    addCopies cardNumber cardPoints cardCopies updated
 
-addCopies :: Integer -> Integer -> Integer -> Points -> Points
-addCopies currentCard cardPoints toAdd points = 
+addCopies :: Integer -> Integer -> Integer -> Copies -> Copies
+addCopies currentCard cardPoints toAdd copies = 
   case cardPoints of
-    0 -> points
+    0 -> copies
     _ -> 
       addCopies currentCard (cardPoints - 1) toAdd
-      $ Map.insertWith (+) (currentCard + cardPoints) toAdd points
+      $ Map.insertWith (+) (currentCard + cardPoints) toAdd copies
     
-calculatePoints :: String -> Integer
-calculatePoints line = 
+calculateCopies :: String -> Integer
+calculateCopies line = 
   toInteger
   . length 
   . uncurry intersection
