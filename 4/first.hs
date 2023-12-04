@@ -1,4 +1,5 @@
 import Data.Set (Set, intersection, fromList)
+import qualified Shared as Shared
 
 main :: IO ()
 main = print =<< solve <$> readFile "data.txt"
@@ -14,27 +15,11 @@ calculatePoints line =
   deducePoints
   . length 
   . uncurry intersection
-  . parseNumbers
-  $ skipToColon line
+  . Shared.parseNumbers
+  $ Shared.skipToColon line
 
 deducePoints :: Int -> Integer
 deducePoints matchedCount = 
   case matchedCount of
     0 -> 0
     _ -> 2 ^ (matchedCount - 1)
-
-skipToColon :: String -> String
-skipToColon line = tail $ dropWhile (/= ':') line
-
-parseNumbers :: String -> (Set Integer, Set Integer)
-parseNumbers line = 
-  (
-    parseNumbers' $ takeWhile notStick line, 
-    parseNumbers' . tail $ dropWhile notStick line
-  )
-
-notStick :: Char -> Bool
-notStick = (/= '|')
-
-parseNumbers' :: String -> Set Integer
-parseNumbers' line = fromList $ read <$> words line

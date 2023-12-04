@@ -2,6 +2,7 @@ import Data.Set (Set, intersection, fromList)
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Char (isDigit)
+import qualified Shared as Shared
 
 
 main :: IO ()
@@ -36,27 +37,11 @@ calculatePoints line =
   toInteger
   . length 
   . uncurry intersection
-  $ parseNumbers line
+  $ Shared.parseNumbers line
 
 parseCardNumber :: String -> (Integer, String)
 parseCardNumber line =
   (
     read . takeWhile isDigit $ dropWhile (not . isDigit) line,
-    skipToColon line
+    Shared.skipToColon line
   )
-
-skipToColon :: String -> String
-skipToColon line = tail $ dropWhile (/= ':') line
-
-parseNumbers :: String -> (Set Integer, Set Integer)
-parseNumbers line = 
-  (
-    parseNumbers' $ takeWhile notStick line, 
-    parseNumbers' . tail $ dropWhile notStick line
-  )
-
-notStick :: Char -> Bool
-notStick = (/= '|')
-
-parseNumbers' :: String -> Set Integer
-parseNumbers' line = fromList $ read <$> words line
