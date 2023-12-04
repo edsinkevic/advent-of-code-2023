@@ -2,13 +2,13 @@ import Data.Set (Set, intersection, fromList)
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Char (isDigit)
-import qualified Shared as Shared
+import qualified Shared
 
 main :: IO ()
-main = print =<< solve <$> readFile "data.txt"
+main = print . solve =<< readFile "data.txt"
 
 solve :: String -> Integer
-solve content = 
+solve content =
   Map.foldr (+) 0
   . foldl accumulateCopies Map.empty
   $ lines content
@@ -16,7 +16,7 @@ solve content =
 type Copies = Map Integer Integer
 
 accumulateCopies :: Copies -> String -> Copies
-accumulateCopies copies line = 
+accumulateCopies copies line =
   let (cardNumber, afterColon) = parseCardNumber line
       cardPoints = calculateCopies afterColon
       updated = Map.insertWith (+) cardNumber 1 copies
@@ -24,17 +24,17 @@ accumulateCopies copies line =
     addCopies cardNumber cardPoints cardCopies updated
 
 addCopies :: Integer -> Integer -> Integer -> Copies -> Copies
-addCopies currentCard cardPoints toAdd copies = 
+addCopies currentCard cardPoints toAdd copies =
   case cardPoints of
     0 -> copies
-    _ -> 
+    _ ->
       addCopies currentCard (cardPoints - 1) toAdd
       $ Map.insertWith (+) (currentCard + cardPoints) toAdd copies
-    
+
 calculateCopies :: String -> Integer
-calculateCopies line = 
+calculateCopies line =
   toInteger
-  . length 
+  . length
   . uncurry intersection
   $ Shared.parseNumbers line
 

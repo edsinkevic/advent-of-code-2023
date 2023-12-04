@@ -1,5 +1,5 @@
 module Shared where
-import Data.Set (Set, intersection, fromList)
+import Data.Set (Set, fromList)
 
 skipToColon :: String -> String
 skipToColon line = tail $ dropWhile (/= ':') line
