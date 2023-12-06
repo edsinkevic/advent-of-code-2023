@@ -1,4 +1,3 @@
-import Debug.Trace (traceShowId)
 import qualified Shared
 
 main :: IO ()
@@ -8,8 +7,7 @@ solve :: [String] -> Integer
 solve [times, distances] = 
   product
   $ toInteger
-  . length
-  . Shared.naiveCalculation 1
+  . uncurry Shared.calculate
   <$> zip (parseLine 6 times) (parseLine 10 distances) 
 
 parseLine :: Int -> String -> [Integer]

@@ -1,22 +1,14 @@
 module Shared where
 
-naiveCalculation :: Integer -> (Integer, Integer) -> [Integer]
-naiveCalculation holdTime pair@(time, distance) = 
-  let (result, nextHoldTime, beats) = calculate time distance holdTime in
-    if not beats
-      then naiveCalculation nextHoldTime pair 
-      else naiveCalculation' pair nextHoldTime [result]
+calculate :: Integer -> Integer -> Integer
+calculate time distance =
+  let quad = quadratic time distance
+      x1 = floor $ quad (+)
+      x2 = ceiling $ quad (-) in
+    (abs $ x2 - x1) - 1
 
-naiveCalculation' :: (Integer, Integer) -> Integer -> [Integer] -> [Integer]
-naiveCalculation' pair@(time, distance) holdTime results = 
-  let (result, nextHoldTime, beats) = calculate time distance holdTime in
-    if beats
-      then naiveCalculation' pair nextHoldTime (result:results)
-      else results
-
-calculate :: Integer -> Integer -> Integer -> (Integer, Integer, Bool)
-calculate time distance holdTime =
-  let result = holdTime * (time - holdTime)
-      nextHoldTime = holdTime + 1
-      beats = result > distance in
-    (result, nextHoldTime, beats)
+quadratic time distance operand  = 
+  let b = time
+      c = distance
+      det = b^2 - 4 * c in
+    fromIntegral (-b) `operand` sqrt (fromIntegral det) / (-2)
