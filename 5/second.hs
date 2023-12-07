@@ -1,6 +1,4 @@
 import Debug.Trace (traceShowId)
-import Data.Maybe (fromMaybe)
-import Control.Monad (msum)
 
 data Conversion = Conversion Integer Integer Integer
 type PuzzleMap = [Conversion]
@@ -48,11 +46,11 @@ toConversion line =
 
 getLocation :: Integer -> Conversion -> Maybe Integer
 getLocation seed (Conversion s d r) =
-  let x = seed - d in 
-    if x >= 0 && x <= r 
-    then Just $ s + x
-    else Nothing
+  let x = seed - d in if x >= 0 && x <= r then Just $ s + x else Nothing
 
 getMinLocation :: PuzzleMap -> Integer -> Integer
 getMinLocation puzzleMap seed = 
-  fromMaybe seed . msum $ getLocation seed <$> puzzleMap
+  case puzzleMap of
+    [] -> seed
+    (first:rest) -> 
+      maybe (getMinLocation rest seed) id $ getLocation seed first
