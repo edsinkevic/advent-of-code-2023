@@ -24,3 +24,17 @@ parseLine :: String -> (String, Integer)
 parseLine line =
   let [hand, bid] = words line in
     (hand, read bid)
+
+getType :: String -> Map Char Int -> Type
+getType hand occurences
+  | oLength == handLength = High
+  | oLength == handLength - 1 = One
+  | oLength == handLength - 2 && highestOccurence == 3 = Three
+  | oLength == handLength - 2 = Two
+  | oLength == handLength - 3 && highestOccurence == 3 = Full
+  | highestOccurence == 4 = Four
+  | oLength == 1 = Five
+  | otherwise = error "Hand had no type"
+    where oLength = length occurences
+          handLength = length hand
+          highestOccurence = maximum $ Map.elems occurences

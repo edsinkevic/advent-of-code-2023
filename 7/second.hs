@@ -9,16 +9,6 @@ import Shared (Player (..), Type (..))
 main :: IO ()
 main = print . solve . lines =<< readFile "data.txt"
 
-instance Eq Player where
-  (Player ah _) == (Player bh _) = 
-    getType ah == getType bh && ah == bh
-
-instance Ord Player where
-  compare (Player ah _) (Player bh _) =
-    if c == EQ
-      then compareHands ah bh 
-      else c
-    where c = getType ah `compare` getType bh
 
 compareHands :: String -> String -> Ordering
 compareHands [] [] = EQ
@@ -34,20 +24,9 @@ solve :: [String] -> Integer
 solve lines = Shared.joinBids 1 0 . sort $ Shared.toPlayer . Shared.parseLine <$> lines
 
 getType :: String -> Type
-getType hand
-  | oLength == 1 = Five
-  | highestOccurence == 4 = Four
-  | oLength == handLength = High
-  | oLength == handLength - 1 = One
-  | oLength == handLength - 2 && highestOccurence == 3 = Three
-  | oLength == handLength - 2 = Two
-  | oLength == handLength - 3 && highestOccurence == 3 = Full
-  | otherwise = error $ show hand
-    where occurences = jokerize $ Shared.getOccurences hand
-          handLength = length hand
-          oLength = length occurences 
-          highestOccurence = maximum $ Map.elems occurences
+getType hand = Shared.getType hand . jokerize $ Shared.getOccurences hand
 
+jokerize :: Map Char Int -> Map Char Int
 jokerize occurences = 
   let jokers = Map.findWithDefault 0 'J' occurences
       withoutJokers = Map.delete 'J' occurences
@@ -59,5 +38,17 @@ jokerize occurences =
         $ Map.assocs withoutJokers in 
       Map.insertWith (+) highestKey jokers withoutJokers
 
+headMaybe :: [a] -> Maybe a
 headMaybe [] = Nothing
 headMaybe (x:xs) = Just x
+
+instance Eq Player where
+  (Player ah _) == (Player bh _) = 
+    getType ah == getType bh && ah == bh
+
+instance Ord Player where
+  compare (Player ah _) (Player bh _) =
+    if c == EQ
+      then compareHands ah bh 
+      else c
+    where c = getType ah `compare` getType bh
