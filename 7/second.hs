@@ -3,13 +3,11 @@ import Data.Map (Map)
 import qualified Data.Map as Map
 import Debug.Trace
 import Data.List (sort, sortBy)
+import qualified Shared
+import Shared (Player (..), Type (..))
 
 main :: IO ()
 main = print . solve . lines =<< readFile "data.txt"
-
-data Type = High | One | Two | Three | Full | Four | Five deriving (Enum, Eq, Ord, Show)
-
-data Player = Player String Integer deriving Show
 
 instance Eq Player where
   (Player ah _) == (Player bh _) = 
@@ -32,17 +30,8 @@ cardValue :: Char -> Int
 cardValue c =
   maybe 0 succ $ elemIndex c ['J', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 
-
 solve :: [String] -> Integer
-solve lines = joinBids 1 0 . sort $ toPlayer . parseLine <$> lines
-
-joinBids :: Integer -> Integer -> [Player] -> Integer
-joinBids _ sum [] = sum
-joinBids multiplier sum ((Player _ bid):xs) =
-  joinBids (succ multiplier) (sum + bid * multiplier) xs
-
-toPlayer :: (String, Integer) -> Player
-toPlayer (hand, bid) = Player hand bid
+solve lines = Shared.joinBids 1 0 . sort $ Shared.toPlayer . Shared.parseLine <$> lines
 
 getType :: String -> Type
 getType hand
@@ -54,7 +43,7 @@ getType hand
   | oLength == handLength - 2 = Two
   | oLength == handLength - 3 && highestOccurence == 3 = Full
   | otherwise = error $ show hand
-    where occurences = traceShowId . jokerize $ getOccurences hand
+    where occurences = jokerize $ Shared.getOccurences hand
           handLength = length hand
           oLength = length occurences 
           highestOccurence = maximum $ Map.elems occurences
@@ -72,12 +61,3 @@ jokerize occurences =
 
 headMaybe [] = Nothing
 headMaybe (x:xs) = Just x
-
-getOccurences :: String -> Map Char Int
-getOccurences = foldl accumulate Map.empty
-  where accumulate accum next = Map.insertWith (+) next 1 accum
-
-parseLine :: String -> (String, Integer)
-parseLine line =
-  let [hand, bid] = words line in
-    (hand, read bid)
