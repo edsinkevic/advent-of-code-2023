@@ -10,7 +10,11 @@ accumulate :: Integer -> String -> Integer
 accumulate sum line = sum + extrapolated (read <$> words line)
 
 extrapolated :: [Integer] -> Integer
-extrapolated history = extrapolate $ Shared.differences history [history]
-  
-extrapolate :: [[Integer]] -> Integer
-extrapolate histories = foldl (+) 0 . reverse $ head . reverse <$> histories
+extrapolated history = differences history (head $ reverse history)
+
+differences :: [Integer] -> Integer -> Integer
+differences history accum =
+  if shouldEnd then accum else differences diff (accum + diffLast)
+    where diff = Shared.difference history []
+          diffLast = head $ reverse diff
+          shouldEnd = all (== 0) diff
